@@ -24,3 +24,19 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+button {
+  @apply transition-all bg-blue-500 dark:bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 mx-1 rounded-lg border-none cursor-pointer;
+}
+
+.onboarding-modal {
+  @apply p-4 bg-white dark:bg-gray-800 flex justify-center items-center min-h-screen;
+}
+
+.modal-content {
+  @apply p-4 bg-gray-100 dark:bg-gray-900 rounded-lg w-xl min-h-48 mb-20 relative;
+}
+
+.modal-actions {
+  @apply mt-6;
+}
