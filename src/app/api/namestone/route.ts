@@ -38,10 +38,12 @@ export async function GET(request: Request) {
 
     console.log('filtered results:', filteredResults);
     return NextResponse.json(filteredResults);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let message = 'Unknown error';
+    if (error instanceof Error) message = error.message;
     console.error('NameStone API error:', error);
     return NextResponse.json(
-      { error: error.message },
+      { error: message },
       { status: 500 }
     );
   }
@@ -66,10 +68,12 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let message = 'Unknown error';
+    if (error instanceof Error) message = error.message;
     console.error('NameStone API error:', error);
     return NextResponse.json(
-      { error: error.message },
+      { error: message },
       { status: 500 }
     );
   }

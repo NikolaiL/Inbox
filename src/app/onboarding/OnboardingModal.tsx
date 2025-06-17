@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import NameStone from '@namestone/namestone-sdk';
 
 const steps = ['Wallet', 'ENS', 'Inbox'];
 
@@ -68,10 +67,11 @@ export function OnboardingModal() {
           setEnsStatus(available ? 'available' : 'taken');
           setEnsMessage(available ? '✅ Name is available!' : '🛑 Name is taken.');
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (!cancelled) {
           setEnsStatus('error');
           setEnsMessage('Error checking name.');
+          console.error('Error checking name:', e);
         }
       }
     }, 500);
@@ -91,9 +91,10 @@ export function OnboardingModal() {
       await registerName(ensInput, walletAddress);
       setEnsStatus('success');
       setEnsMessage('Registration successful!');
-    } catch (e: any) {
+    } catch (e: unknown) {
       setEnsStatus('error');
       setEnsMessage('Registration failed.');
+      console.error('Error registering name:', e);
     } finally {
       setRegistering(false);
     }

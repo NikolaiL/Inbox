@@ -1,4 +1,4 @@
-let mockPrivyState: any = {
+let mockPrivyState: unknown = {
   login: jest.fn(),
   ready: true,
   authenticated: false,
