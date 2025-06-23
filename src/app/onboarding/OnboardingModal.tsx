@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useOnboardingStore } from '../../store/useOnboardingStore';
+import { useNotificationStore } from '../../store/useNotificationStore';
 
 const steps = ['Connect Wallet', 'Register ENS', 'Complete'];
 
@@ -33,6 +34,8 @@ export function OnboardingModal() {
     resetEns
   } = useOnboardingStore();
 
+  const { showToast } = useNotificationStore();
+
   // ENS step state
   const [ensInput, setEnsInput] = useState('');
   const [status, setStatus] = useState<EnsStatus>('idle');
@@ -59,9 +62,7 @@ export function OnboardingModal() {
         try {
           const response = await fetch(`/api/namestone?address=${walletAddress}`);
           const data = await response.json();
-          if (data && data.length > 0) {
-            setExistingNames(data);
-          }
+          setExistingNames(data);
         } catch (error) {
           console.error('Error fetching existing names:', error);
         }
@@ -146,7 +147,7 @@ export function OnboardingModal() {
         },
         body: JSON.stringify({
           name: ensInput,
-          owner: walletAddress,
+          address: walletAddress,
         }),
       });
       const data = await res.json();
@@ -161,6 +162,7 @@ export function OnboardingModal() {
       setEnsInput('');
       setStatus('registered');
       setMessage('Registration successful!');
+      showToast('Name registered successfully!', 'success');
       
       // Move to next step after a brief delay
       setTimeout(() => setStep(2), 1000);
@@ -344,6 +346,7 @@ export function OnboardingModal() {
                             onClick={() => {
                               setEnsRegistered(true, name.name);
                               setStep(2);
+                              showToast(`Selected existing name: ${name.name}`, 'info');
                             }}
                             className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-md hover:bg-blue-200"
                           >
