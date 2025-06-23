@@ -62,9 +62,7 @@ export function OnboardingModal() {
         try {
           const response = await fetch(`/api/namestone?address=${walletAddress}`);
           const data = await response.json();
-          if (data && data.length > 0) {
-            setExistingNames(data);
-          }
+          setExistingNames(data);
         } catch (error) {
           console.error('Error fetching existing names:', error);
         }
@@ -149,7 +147,7 @@ export function OnboardingModal() {
         },
         body: JSON.stringify({
           name: ensInput,
-          owner: walletAddress,
+          address: walletAddress,
         }),
       });
       const data = await res.json();

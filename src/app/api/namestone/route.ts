@@ -8,7 +8,7 @@ const ns = new NameStone(NAMESTONE_API_KEY, NAMESTONE_API_CONFIG);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const domain = searchParams.get('domain');
+  const domain = process.env.NEXT_PUBLIC_NAMESTONE_ENS_DOMAIN || '';
   const name = searchParams.get('name');
   const address = searchParams.get('address');
   const exact_match = searchParams.get('exact_match') === 'true';
@@ -68,18 +68,19 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const domain = process.env.NEXT_PUBLIC_NAMESTONE_ENS_DOMAIN || '';
     
     // Validate required parameters
-    if (!body.name || !body.domain || !body.address) {
+    if (!body.name || !body.address) {
       return NextResponse.json(
-        { error: 'Name, domain, and address are required' },
+        { error: 'Name and address are required' },
         { status: 400 }
       );
     }
 
     // we will need to check if the name is available
     const results = await ns.searchNames({
-      domain: body.domain,
+      domain: domain,
       name: body.name,
       exact_match: true,
     });
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
       
     await ns.setName({
       name: body.name,
-      domain: body.domain,
+      domain: domain,
       address: body.address,
     });
 
