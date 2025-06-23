@@ -1,10 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: [
-      '@xmtp/user-preferences-bindings-wasm',
-    ],
-  },
+  serverExternalPackages: [
+    '@xmtp/user-preferences-bindings-wasm',
+  ],
 };
 
 module.exports = nextConfig;

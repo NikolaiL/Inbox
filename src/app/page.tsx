@@ -8,7 +8,7 @@ import { OnboardingModal } from './onboarding/OnboardingModal';
 
 export default function HomePage() {
   const router = useRouter();
-  const { authenticated, ready } = usePrivy();
+  const { ready } = usePrivy();
   const { walletConnected, ensRegistered, showModal } = useOnboardingStore();
 
   // Check if onboarding is complete

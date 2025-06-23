@@ -8,7 +8,13 @@ const steps = ['Connect Wallet', 'Register ENS', 'Complete'];
 
 // Read config from env
 const ENS_DOMAIN = process.env.NEXT_PUBLIC_ENS_DOMAIN || 'inbox.eth';
-const ENS_REGISTRY_ADDRESS = process.env.NEXT_PUBLIC_ENS_REGISTRY_ADDRESS || '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e';
+
+interface EnsName {
+  name: string;
+  domain: string;
+}
+
+type EnsStatus = 'idle' | 'checking' | 'available' | 'unavailable' | 'registering' | 'registered' | 'error';
 
 export function OnboardingModal() {
   const [step, setStep] = useState(0);
@@ -29,10 +35,9 @@ export function OnboardingModal() {
 
   // ENS step state
   const [ensInput, setEnsInput] = useState('');
-  const [ensStatus, setEnsStatus] = useState<'idle'|'loading'|'available'|'taken'|'error'|'success'>('idle');
-  const [ensMessage, setEnsMessage] = useState('');
-  const [registering, setRegistering] = useState(false);
-  const [existingNames, setExistingNames] = useState<any[]>([]);
+  const [status, setStatus] = useState<EnsStatus>('idle');
+  const [message, setMessage] = useState('');
+  const [existingNames, setExistingNames] = useState<EnsName[]>([]);
 
   // Get the wallet address if available
   const walletAddress = user?.wallet?.address;
@@ -77,48 +82,45 @@ export function OnboardingModal() {
   // ENS availability check (debounced)
   useEffect(() => {
     if (step !== 1 || !ensInput) {
-      setEnsStatus('idle');
-      setEnsMessage('');
+      setStatus('idle');
+      setMessage('');
       return;
     }
 
     if (ensInput.length < 3) {
-      setEnsStatus('error');
-      setEnsMessage('🛑 Name is too short.');
+      setStatus('error');
+      setMessage('🛑 Name is too short.');
       return;
     }
 
     if (ensInput.length > 20) {
-      setEnsStatus('error');
-      setEnsMessage('🛑 Name is too long.');
+      setStatus('error');
+      setMessage('🛑 Name is too long.');
       return;
     }
 
     let cancelled = false;
-    setEnsStatus('loading');
-    setEnsMessage('Checking availability...');
+    setStatus('checking');
+    setMessage('Checking availability...');
     
     const check = setTimeout(async () => {
       try {
-        // implement it using the api endpoint we 've created
-        const response = await fetch(`/api/namestone?domain=${ENS_DOMAIN}&name=${ensInput}`);
-        const data = await response.json();
-        console.log(data);
-
+        const res = await fetch(`/api/namestone?name=${ensInput}`);
+        const data = await res.json();
         const available = data.length === 0;
         if (!cancelled) {
-          setEnsStatus(available ? 'available' : 'taken');
-          setEnsMessage(available ? '✅ Name is available!' : '🛑 Name is unavailable.');
+          setStatus(available ? 'available' : 'unavailable');
+          setMessage(available ? '✅ Name is available!' : '🛑 Name is unavailable.');
         }
       } catch (e: unknown) {
         if (!cancelled) {
-          setEnsStatus('error');
-          setEnsMessage('Error checking name.');
+          setStatus('error');
+          setMessage('Error checking name.');
           console.error('Error checking name:', e);
         }
       }
-    }, 500);
-    
+    }, 500); // Debounce for 500ms
+
     return () => {
       cancelled = true;
       clearTimeout(check);
@@ -128,49 +130,44 @@ export function OnboardingModal() {
   // ENS registration handler
   const handleRegister = async () => {
     if (!walletAddress) {
-      setEnsStatus('error');
-      setEnsMessage('No wallet address available.');
+      setStatus('error');
+      setMessage('No wallet address available.');
       return;
     }
 
-    setRegistering(true);
-    setEnsStatus('loading');
-    setEnsMessage('Registering...');
+    setStatus('registering');
+    setMessage('Registering...');
     
     try {
-      // let's do it using the api endpoint we 've created
-      // TODO: we will need to create a smart contract that will handle the registration fees
-      // or add a payment gateway to the app. For now we just assume it is paid.
-      // handling should be added to the api endpoint so we check the payment before registering the name.
-      const response = await fetch(`/api/namestone`, {
+      const res = await fetch('/api/namestone', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          domain: ENS_DOMAIN,
           name: ensInput,
-          address: walletAddress
-        })
+          owner: walletAddress,
+        }),
       });
-      const data = await response.json();
+      const data = await res.json();
       console.log(data);
       if (data.error) {
-        setEnsStatus('error');
-        setEnsMessage(data.error);
+        setStatus('error');
+        setMessage(data.error);
         return;
       }
 
       setEnsRegistered(true, ensInput);
       setEnsInput('');
-      setEnsStatus('success');
-      setEnsMessage('Registration successful!');
+      setStatus('registered');
+      setMessage('Registration successful!');
       
       // Move to next step after a brief delay
       setTimeout(() => setStep(2), 1000);
     } catch (e: unknown) {
-      setEnsStatus('error');
-      setEnsMessage('Registration failed.');
+      setStatus('error');
+      setMessage('Registration failed.');
       console.error('Error registering name:', e);
-    } finally {
-      setRegistering(false);
     }
   };
 
@@ -185,9 +182,8 @@ export function OnboardingModal() {
     logout();
     setStep(0);
     setEnsInput('');
-    setEnsStatus('idle');
-    setEnsMessage('');
-    setRegistering(false);
+    setStatus('idle');
+    setMessage('');
     setExistingNames([]);
   };
 
@@ -299,64 +295,65 @@ export function OnboardingModal() {
             <div>
               <div className="mb-4">
                 <h3 className="text-lg font-semibold mb-2">Choose Your Inbox Name</h3>
-                <p className="text-gray-600 text-sm">
-                  Register a unique name for your inbox (e.g., "alice.inbox.eth")
+                <p className="mt-2 text-sm text-gray-500">
+                  Register a unique name for your inbox (e.g., &quot;alice.inbox.eth&quot;)
                 </p>
               </div>
-              <div className="space-y-3">
-                {existingNames.length > 0 && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-2">Your existing names:</h4>
-                    <ul className="space-y-2">
-                      {existingNames.map((name) => (
-                        <li key={name.name} className="flex items-center justify-between">
-                          <span className="text-blue-700">{name.name}.{name.domain}</span>
-                          <button
-                            onClick={() => {
-                              setEnsRegistered(true, name.name);
-                              setStep(2);
-                            }}
-                            className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                          >
-                            Select
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              <div className="space-y-4">
                 <div>
                   <input
                     type="text"
-                    placeholder="Enter your name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="your-name"
+                    className="w-full p-3 border rounded-lg"
                     value={ensInput}
                     onChange={e => setEnsInput(e.target.value)}
-                    disabled={registering}
+                    disabled={status === 'registering' || status === 'registered'}
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Your inbox will be: {ensInput ? `${ensInput}.${ENS_DOMAIN}` : `name.${ENS_DOMAIN}`}
                   </p>
                 </div>
                 
-                {ensMessage && (
+                {message && (
                   <div className={`p-3 rounded-lg text-sm ${
-                    ensStatus === 'success' ? 'bg-green-50 text-green-800' :
-                    ensStatus === 'error' ? 'bg-red-50 text-red-800' :
-                    ensStatus === 'loading' ? 'bg-blue-50 text-blue-800' :
+                    status === 'registered' ? 'bg-green-50 text-green-800' :
+                    status === 'error' || status === 'unavailable' ? 'bg-red-50 text-red-800' :
+                    status === 'checking' ? 'bg-blue-50 text-blue-800' :
                     'bg-gray-50 text-gray-800'
                   }`}>
-                    {ensMessage}
+                    {message}
                   </div>
                 )}
 
                 <button
                   onClick={handleRegister}
-                  disabled={ensStatus !== 'available' || registering}
+                  disabled={status !== 'available'}
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
-                  {registering ? 'Registering...' : 'Register Name'}
+                  {status === 'registering' ? 'Registering...' : 'Register Name'}
                 </button>
+
+                {existingNames.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="font-semibold mb-2">Your existing names:</h4>
+                    <ul className="space-y-2">
+                      {existingNames.map((name) => (
+                        <li key={name.name} className="flex items-center justify-between">
+                          <span>{name.name}.{name.domain}</span>
+                          <button
+                            onClick={() => {
+                              setEnsRegistered(true, name.name);
+                              setStep(2);
+                            }}
+                            className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-md hover:bg-blue-200"
+                          >
+                            Use this name
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           )}

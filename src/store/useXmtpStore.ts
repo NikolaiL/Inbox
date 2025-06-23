@@ -1,3 +1,4 @@
+import { DecodedMessage } from "@xmtp/react-sdk";
 import { create } from "zustand";
 
 export type RecipientState = "invalid" | "loading" | "error" | "valid";
@@ -31,8 +32,8 @@ interface XmtpState {
   setStartedFirstMessage: (startedFirstMessage: boolean) => void;
   attachmentError: string;
   setAttachmentError: (attachmentError: string) => void;
-  activeMessage?: any;
-  setActiveMessage: (message?: any) => void;
+  activeMessage?: DecodedMessage;
+  setActiveMessage: (message?: DecodedMessage) => void;
   activeTab: ActiveTab;
   setActiveTab: (activeTab: ActiveTab) => void;
   changedConsentCount: number;
