@@ -43,10 +43,10 @@ INBOX is a decentralized inbox web application that enables users to onboard wit
    Create a `.env.local` file in this folder with the following:
    ```env
    NEXT_PUBLIC_NAMESTONE_ENS_DOMAIN=yourbrand.eth
-   NEXT_PUBLIC_NAMESTONE_API_KEY=your-namestone-api-key
    NAMESTONE_API_KEY=your-namestone-api-key
+   NEXT_PUBLIC_PRIVY_APP_ID=your-privy-app-key
    ```
-   Replace values with your actual ENS domain and NameStone API key.
+   Fill with your actual values
 
 4. **Run the development server:**
    ```bash
