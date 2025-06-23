@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  serverExternalPackages: [
+    '@xmtp/user-preferences-bindings-wasm',
+  ],
 };
 
-export default nextConfig;
+module.exports = nextConfig;

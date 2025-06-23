@@ -10,7 +10,23 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const domain = searchParams.get('domain');
   const name = searchParams.get('name');
+  const address = searchParams.get('address');
   const exact_match = searchParams.get('exact_match') === 'true';
+
+  if (address) {
+    try {
+      const results = await ns.getNames({ address });
+      return NextResponse.json(results);
+    } catch (error: unknown) {
+      let message = 'Unknown error';
+      if (error instanceof Error) message = error.message;
+      console.error('NameStone API error:', error);
+      return NextResponse.json(
+        { error: message },
+        { status: 500 }
+      );
+    }
+  }
 
   console.log('domain', domain);
   console.log('name', name);
@@ -61,6 +77,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // we will need to check if the name is available
+    const results = await ns.searchNames({
+      domain: body.domain,
+      name: body.name,
+      exact_match: true,
+    });
+    if (results.length > 0) {
+      return NextResponse.json({ error: 'Name is already taken' }, { status: 400 });
+    }
+
+    // TODO: we will need to check if the payment ofr this name is received.
+    // we will need to create a smart contract that will handle the registration fees.
+    // or add a payment gateway to the app. For now we just assume it is paid.
+    // For now, we just assume it is paid.  
+      
     await ns.setName({
       name: body.name,
       domain: body.domain,
