@@ -12,11 +12,19 @@
   "dependencies": {
     "@namestone/namestone-sdk": "^0.2.15",
     "@privy-io/react-auth": "^2.14.2",
-    "@xmtp/xmtp-js": "^13.0.4",
+    "@xmtp/content-type-primitives": "^2.0.2",
+    "@xmtp/content-type-reaction": "^2.0.2",
+    "@xmtp/content-type-remote-attachment": "^2.0.2",
+    "@xmtp/content-type-reply": "^2.0.2",
+    "@xmtp/content-type-text": "^2.0.2",
+    "@xmtp/react-sdk": "^9.0.0",
+    "@xmtp/xmtp-js": "^12.1.0",
+    "buffer": "^6.0.3",
     "ethers": "^5.7.2",
     "next": "^15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-virtuoso": "^4.13.0",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
