@@ -2,18 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PrivyProvider } from '@privy-io/react-auth';
-import {
-  XMTPProvider,
-  attachmentContentTypeConfig,
-  reactionContentTypeConfig,
-  replyContentTypeConfig,
-} from '@xmtp/react-sdk';
 
-const contentTypeConfigs = [
-  attachmentContentTypeConfig,
-  reactionContentTypeConfig,
-  replyContentTypeConfig,
-];
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -37,9 +26,8 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <XMTPProvider contentTypeConfigs={contentTypeConfigs}>
-        {isMounted ? children : null}
-      </XMTPProvider>
+      {isMounted ? children : null}
+
     </PrivyProvider>
   );
 } 
