@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useOnboardingStore } from '../../store/useOnboardingStore';
-import { useNotificationStore } from '../../store/useNotificationStore';
 
 const steps = ['Connect Wallet', 'Register ENS', 'Complete'];
 
@@ -33,8 +32,6 @@ export function OnboardingModal() {
     reset,
     resetEns
   } = useOnboardingStore();
-
-  const { showToast } = useNotificationStore();
 
   // ENS step state
   const [ensInput, setEnsInput] = useState('');
@@ -162,9 +159,6 @@ export function OnboardingModal() {
       setEnsInput('');
       setStatus('registered');
       setMessage('Registration successful!');
-      showToast('Name registered successfully!', 'success');
-      
-      // Move to next step after a brief delay
       setTimeout(() => setStep(2), 1000);
     } catch (e: unknown) {
       setStatus('error');
@@ -346,7 +340,6 @@ export function OnboardingModal() {
                             onClick={() => {
                               setEnsRegistered(true, name.name);
                               setStep(2);
-                              showToast(`Selected existing name: ${name.name}`, 'info');
                             }}
                             className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-md hover:bg-blue-200"
                           >
