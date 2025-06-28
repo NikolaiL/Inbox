@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as conversationsModule from './conversations';
+import { Client } from '@xmtp/browser-sdk';
 
 const mockDm = { id: 'dm1' };
 const mockGroup = { id: 'group1' };
@@ -13,19 +14,19 @@ const mockClient = {
 
 describe('XMTP V3 Conversations Module', () => {
   it('listConversations returns conversations from the client', async () => {
-    const result = await conversationsModule.listConversations(mockClient as any);
+    const result = await conversationsModule.listConversations(mockClient as unknown as Client);
     expect(result).toEqual([mockDm, mockGroup]);
     expect(mockClient.conversations.list).toHaveBeenCalled();
   });
 
   it('newDm creates a new DM with the given inboxId', async () => {
-    const result = await conversationsModule.newDm(mockClient as any, 'inbox123');
+    const result = await conversationsModule.newDm(mockClient as unknown as Client, 'inbox123');
     expect(result).toEqual({ id: 'dm-inbox123' });
     expect(mockClient.conversations.newDm).toHaveBeenCalledWith('inbox123');
   });
 
   it('syncConversations calls sync on the client', async () => {
-    await conversationsModule.syncConversations(mockClient as any);
+    await conversationsModule.syncConversations(mockClient as unknown as Client);
     expect(mockClient.conversations.sync).toHaveBeenCalled();
   });
 }); 

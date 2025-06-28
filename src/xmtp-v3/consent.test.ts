@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as consentModule from './consent';
 import { ConsentEntityType, ConsentState } from './consent';
+import { Client } from '@xmtp/browser-sdk';
 
 const mockClient = {
   preferences: {
@@ -12,7 +13,7 @@ const mockClient = {
 describe('XMTP V3 Consent Module', () => {
   it('getConsentState calls client.preferences.getConsentState with correct args', async () => {
     const result = await consentModule.getConsentState(
-      mockClient as any,
+      mockClient as unknown as Client,
       ConsentEntityType.InboxId,
       'entity123'
     );
@@ -22,7 +23,7 @@ describe('XMTP V3 Consent Module', () => {
 
   it('setConsentState calls client.preferences.setConsentStates with correct args', async () => {
     await consentModule.setConsentState(
-      mockClient as any,
+      mockClient as unknown as Client,
       ConsentEntityType.InboxId,
       'entity123',
       ConsentState.Allowed

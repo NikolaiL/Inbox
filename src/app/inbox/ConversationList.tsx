@@ -1,9 +1,9 @@
 import React from 'react';
 import { useXmtpV3Store } from '../../store/useXmtpV3Store';
-import type { Conversation } from '@xmtp/browser-sdk';
+import type { Dm, Group } from '@xmtp/browser-sdk';
 
 export function ConversationList({ onSelect, selectedId }: {
-  onSelect: (c: Conversation) => void;
+  onSelect: (c: Dm<unknown> | Group<unknown>) => void;
   selectedId: string | null;
 }) {
   const { conversations, isLoading } = useXmtpV3Store();
@@ -17,7 +17,7 @@ export function ConversationList({ onSelect, selectedId }: {
         <li
           key={c.id}
           style={{ fontWeight: c.id === selectedId ? 'bold' : 'normal', cursor: 'pointer' }}
-          onClick={() => onSelect(c)}
+          onClick={() => onSelect(c as Dm<unknown> | Group<unknown>)}
         >
           {c.toString()}
         </li>

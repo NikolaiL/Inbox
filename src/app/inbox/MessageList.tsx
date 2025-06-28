@@ -1,18 +1,12 @@
 import React from 'react';
+import type { DecodedMessage } from '@xmtp/browser-sdk';
 
-export function MessageList({ conversationId, messages, isLoading, error }: {
-  conversationId: string;
-  messages: Array<{ id: string; content: string; sender: string }>;
-  isLoading: boolean;
-  error: Error | null;
-}) {
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>{error.message}</div>;
+export function MessageList({ messages }: { messages: DecodedMessage<unknown>[] }) {
   if (!messages.length) return <div>No messages</div>;
   return (
     <ul>
       {messages.map((m) => (
-        <li key={m.id}>{m.content}</li>
+        <li key={m.id}>{typeof m.content === 'string' ? m.content : String(m.id)}</li>
       ))}
     </ul>
   );

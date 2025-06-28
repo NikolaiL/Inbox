@@ -1,27 +1,25 @@
 import React, { useState } from 'react';
 
-export function MessageInput({ conversationId, onSend, isLoading }: {
-  conversationId: string;
-  onSend: (value: string) => void;
-  isLoading: boolean;
-}) {
+export function MessageInput({ onSend, disabled }: { onSend: (msg: string) => void; disabled: boolean }) {
   const [value, setValue] = useState('');
-
-  function handleSend() {
-    if (!value) return;
-    onSend(value);
-    setValue('');
-  }
-
   return (
-    <div>
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+        if (!value.trim()) return;
+        onSend(value);
+        setValue('');
+      }}
+    >
       <input
-        placeholder="Type a message"
         value={value}
         onChange={e => setValue(e.target.value)}
-        disabled={isLoading}
+        disabled={disabled}
+        placeholder="Type a message..."
       />
-      <button onClick={handleSend} disabled={isLoading}>Send</button>
-    </div>
+      <button type="submit" disabled={disabled || !value.trim()}>
+        Send
+      </button>
+    </form>
   );
 } 

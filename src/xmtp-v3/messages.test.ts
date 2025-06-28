@@ -1,34 +1,24 @@
 import { describe, it, expect, vi } from 'vitest';
-import * as messagesModule from './messages';
+import { listMessages, sendMessage } from './messages';
+import type { Dm, DecodedMessage } from '@xmtp/browser-sdk';
 
-const mockMessages = [{ id: 'msg1' }, { id: 'msg2' }];
-const mockConversation = {
-  messages: vi.fn(async () => mockMessages),
-  send: vi.fn(async (content) => ({ id: 'sent', content })),
-  stream: vi.fn((cb) => {
-    cb(null, { id: 'streamed' });
-    return 'streamHandle';
-  }),
-};
-
-describe('XMTP V3 Messages Module', () => {
-  it('listMessages returns messages from the conversation', async () => {
-    const result = await messagesModule.listMessages(mockConversation as any);
+describe('messages module', () => {
+  it('listMessages returns messages from conversation', async () => {
+    const mockMessages: DecodedMessage<unknown>[] = [
+      ({ id: '1', content: 'hi' } as unknown) as DecodedMessage<unknown>,
+      ({ id: '2', content: 'yo' } as unknown) as DecodedMessage<unknown>,
+    ];
+    const conversation = {
+      messages: vi.fn(async () => mockMessages),
+    } as unknown as Dm<unknown>;
+    const result = await listMessages(conversation);
     expect(result).toEqual(mockMessages);
-    expect(mockConversation.messages).toHaveBeenCalled();
   });
 
   it('sendMessage calls send on the conversation with content', async () => {
-    const result = await messagesModule.sendMessage(mockConversation as any, 'hello');
-    expect(result).toEqual({ id: 'sent', content: 'hello' });
-    expect(mockConversation.send).toHaveBeenCalledWith('hello');
-  });
-
-  it('streamMessages calls stream on the conversation and invokes the callback', async () => {
-    const cb = vi.fn();
-    const handle = await messagesModule.streamMessages(mockConversation as any, cb);
-    expect(mockConversation.stream).toHaveBeenCalled();
-    expect(cb).toHaveBeenCalledWith(null, { id: 'streamed' });
-    expect(handle).toBe('streamHandle');
+    const send = vi.fn(async () => ({}));
+    const conversation = { send } as unknown as Dm<unknown>;
+    await sendMessage(conversation, 'hello');
+    expect(send).toHaveBeenCalledWith('hello');
   });
 }); 

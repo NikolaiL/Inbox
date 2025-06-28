@@ -1,8 +1,8 @@
-import { Client } from '@xmtp/browser-sdk';
+import { Client, Identifier } from '@xmtp/browser-sdk';
 
 let xmtpClient: Client | null = null;
 
-export async function buildXmtpClient(signer: any): Promise<Client> {
+export async function buildXmtpClient(signer: Identifier): Promise<Client> {
   xmtpClient = await Client.build(signer);
   return xmtpClient;
 }

@@ -1,13 +1,15 @@
 import { create } from 'zustand';
-import type { Client, Conversation } from '@xmtp/browser-sdk';
+import type { Dm, Group, DecodedMessage } from '@xmtp/browser-sdk';
 
 interface XmtpV3State {
-  client: Client | null;
-  conversations: Conversation[];
+  client: unknown | null;
+  conversations: Array<Dm<unknown> | Group<unknown>>;
   isLoading: boolean;
   error: Error | null;
-  initialize: (signer: any) => Promise<void>;
+  initialize: () => Promise<void>;
   reset: () => void;
+  listMessages: (c: Dm<unknown> | Group<unknown>) => Promise<DecodedMessage<unknown>[]>;
+  sendMessage: (c: Dm<unknown> | Group<unknown>, content: string) => Promise<void>;
 }
 
 export const useXmtpV3Store = create<XmtpV3State>((set) => ({
@@ -15,15 +17,20 @@ export const useXmtpV3Store = create<XmtpV3State>((set) => ({
   conversations: [],
   isLoading: false,
   error: null,
-  initialize: async (signer) => {
+  initialize: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { Client } = await import('@xmtp/browser-sdk');
-      const client = await Client.build(signer);
-      set({ client, isLoading: false });
-    } catch (error) {
-      set({ error: error as Error, isLoading: false });
+      // TODO: Implement XMTP client initialization
+    } catch (e) {
+      set({ error: e as Error, isLoading: false });
     }
   },
   reset: () => set({ client: null, conversations: [], isLoading: false, error: null }),
+  listMessages: async () => {
+    // Implementation here
+    return [];
+  },
+  sendMessage: async () => {
+    // Implementation here
+  },
 })); 

@@ -1,35 +1,29 @@
 import { expect } from 'vitest';
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
-import { describe, it, beforeEach, afterEach } from 'vitest';
+import { describe, it, afterEach } from 'vitest';
 import { MessageList } from './MessageList';
+import type { DecodedMessage } from '@xmtp/browser-sdk';
 
-const mockMessages = [
-  { id: 'm1', content: 'Hello', sender: '0xabc' },
-  { id: 'm2', content: 'World', sender: '0xdef' },
+// Test mock workaround: use 'unknown as DecodedMessage<unknown>' to satisfy type system for minimal mocks
+const mockMessages: DecodedMessage<unknown>[] = [
+  ({ id: 'm1', content: 'Hello' } as unknown) as DecodedMessage<unknown>,
+  ({ id: 'm2', content: 'World' } as unknown) as DecodedMessage<unknown>,
 ];
 
 describe('MessageList', () => {
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+  });
 
   it('renders a list of messages', () => {
-    render(<MessageList conversationId="c1" messages={mockMessages} isLoading={false} error={null} />);
+    render(<MessageList messages={mockMessages} />);
     expect(screen.getByText('Hello')).toBeTruthy();
     expect(screen.getByText('World')).toBeTruthy();
   });
 
-  it('shows loading state', () => {
-    render(<MessageList conversationId="c1" messages={[]} isLoading={true} error={null} />);
-    expect(screen.getByText(/loading/i)).toBeTruthy();
-  });
-
   it('shows empty state', () => {
-    render(<MessageList conversationId="c1" messages={[]} isLoading={false} error={null} />);
+    render(<MessageList messages={[]} />);
     expect(screen.getByText(/no messages/i)).toBeTruthy();
-  });
-
-  it('shows error state', () => {
-    render(<MessageList conversationId="c1" messages={[]} isLoading={false} error={new Error('fail')} />);
-    expect(screen.getByText(/fail/i)).toBeTruthy();
   });
 }); 

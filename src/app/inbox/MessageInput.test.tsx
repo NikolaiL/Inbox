@@ -1,39 +1,39 @@
-import { expect, vi } from 'vitest';
+import { expect } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { describe, it, afterEach } from 'vitest';
+import { describe, it, vi, afterEach } from 'vitest';
 import { MessageInput } from './MessageInput';
 
 describe('MessageInput', () => {
-  afterEach(() => cleanup());
-
-  it('renders input and send button', () => {
-    render(<MessageInput conversationId="c1" onSend={() => {}} isLoading={false} />);
-    expect(screen.getByPlaceholderText(/type a message/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /send/i })).toBeTruthy();
+  afterEach(() => {
+    cleanup();
   });
 
-  it('calls onSend with input value when send is clicked', () => {
+  it('calls onSend with input value and clears input', () => {
     const onSend = vi.fn();
-    render(<MessageInput conversationId="c1" onSend={onSend} isLoading={false} />);
-    const input = screen.getByPlaceholderText(/type a message/i);
-    fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.click(screen.getByRole('button', { name: /send/i }));
-    expect(onSend).toHaveBeenCalledWith('Hello');
-  });
-
-  it('disables input and button when isLoading is true', () => {
-    render(<MessageInput conversationId="c1" onSend={() => {}} isLoading={true} />);
-    expect((screen.getByPlaceholderText(/type a message/i) as HTMLInputElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: /send/i }) as HTMLButtonElement).disabled).toBe(true);
-  });
-
-  it('clears input after send', () => {
-    const onSend = vi.fn();
-    render(<MessageInput conversationId="c1" onSend={onSend} isLoading={false} />);
+    render(<MessageInput onSend={onSend} disabled={false} />);
     const input = screen.getByPlaceholderText(/type a message/i) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.click(screen.getByRole('button', { name: /send/i }));
+    fireEvent.submit(input.closest('form')!);
+    expect(onSend).toHaveBeenCalledWith('Hello');
     expect(input.value).toBe('');
+  });
+
+  it('does not call onSend for empty input', () => {
+    const onSend = vi.fn();
+    render(<MessageInput onSend={onSend} disabled={false} />);
+    const input = screen.getByPlaceholderText(/type a message/i) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.submit(input.closest('form')!);
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('disables input and button when disabled', () => {
+    const onSend = vi.fn();
+    render(<MessageInput onSend={onSend} disabled={true} />);
+    const input = screen.getByPlaceholderText(/type a message/i) as HTMLInputElement;
+    const button = screen.getByRole('button', { name: /send/i }) as HTMLButtonElement;
+    expect(input.disabled).toBe(true);
+    expect(button.disabled).toBe(true);
   });
 }); 
