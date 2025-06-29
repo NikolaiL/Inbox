@@ -189,9 +189,27 @@ export function OnboardingModal() {
   };
 
   const handleStepClick = (newStep: number) => {
+    console.log(`handleStepClick: newStep=${newStep}, step=${step}`);
     if (newStep < step) {
       if (newStep === 1 && !walletConnected) {
         return;
+      }
+      if (step === 2 && newStep === 1) {
+        //reset selected ens name
+        resetEns();
+        setEnsInput('');
+        setStatus('idle');
+        setMessage('');
+      }
+      if (step === 2 && newStep === 0) {
+        //reset selected ens name and wallet connected
+        reset();
+        logout();
+        setStep(0);
+        setEnsInput('');
+        setStatus('idle');
+        setMessage('');
+        setExistingNames([]);
       }
       setStep(newStep);
     }
