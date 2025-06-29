@@ -13,7 +13,7 @@ import type { DecodedMessage, Dm, Group } from '@xmtp/browser-sdk';
 export default function InboxPage() {
   const { listMessages, sendMessage } = useXmtpV3Store();
   const { reset: resetOnboarding } = useOnboardingStore();
-  const { user } = usePrivy();
+  const { user, logout } = usePrivy();
   const [selectedConversation, setSelectedConversation] = useState<Dm<unknown> | Group<unknown> | null>(null);
   const [messages, setMessages] = useState<DecodedMessage<unknown>[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -33,6 +33,7 @@ export default function InboxPage() {
 
   function handleExit() {
     resetOnboarding();
+    logout();
     setSelectedConversation(null);
     setMessages([]);
   }
